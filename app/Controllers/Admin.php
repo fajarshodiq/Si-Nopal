@@ -6,18 +6,21 @@ use CodeIgniter\Controller;
 use App\Models\PerkaraModel;
 use App\Models\AktaCeraiModel;
 use App\Models\SettingModel;
+use App\Models\UserModel;
 
 class Admin extends Controller
 {
     protected $perkaraModel;
-    protected $aktaCeraiModel; // Tambahkan variabel untuk model AktaCerai
+    protected $aktaCeraiModel;
     protected $settingModel;
+    protected $userModel;
 
     public function __construct()
     {
         $this->perkaraModel = new PerkaraModel();
-        $this->aktaCeraiModel = new AktaCeraiModel(); // Inisialisasi model AktaCerai
+        $this->aktaCeraiModel = new AktaCeraiModel();
         $this->settingModel = new SettingModel();
+        $this->userModel = new UserModel();
     }
 
     public function index(): mixed // Ubah tipe pengembalian menjadi mixed
@@ -272,8 +275,18 @@ class Admin extends Controller
         $noSeri = $this->request->getPost('no_seri');
         $delivery = (string) $settings['delivery'];
 
-        // Siapkan pesan
-        $message = "Akta cerai dengan No. Perkara: {$perkara['no_perkara']} A/n {$namaPenggugat} telah terbit dengan Nomor Seri {$noSeri} pada tanggal {$formattedDate}. Akta cerai dapat diambil di Pengadilan Agama Tanggamus atau dapat mengajukan permohonan delivery akta cerai di link berikut: {$delivery}";
+        // Ambil template pesan dari settings
+        $templateMessage = $settings['notifikasi_penerbitan_akta_cerai'];
+
+        // Siapkan pesan dengan data dinamis
+        $message = str_replace(
+            ['[no_perkara]', '[penggugat]', '[no_seri]', '[tanggal]', '[delivery]'],
+            [$perkara['no_perkara'], $namaPenggugat, $noSeri, $formattedDate, $delivery],
+            $templateMessage
+        );
+
+        // dd($message);
+        // die;
 
         // Konversi data settings ke string
         $apiKey = (string) $settings['apikey'];
@@ -287,9 +300,6 @@ class Admin extends Controller
             "number" => $noWhatsapp,
             "message" => $message
         ];
-
-        // dd($requestData);
-        // die;
 
         // Kirim pesan WhatsApp dengan cURL
         $curl = curl_init();
@@ -394,8 +404,6 @@ class Admin extends Controller
     public function sendReminderNotification()
     {
         $reminderDays = $this->request->getPost('reminder_days');
-        // dd($reminderDays);
-        // die;
 
         // Log the value for debugging
         log_message('debug', 'Reminder Days: ' . print_r($reminderDays, true));
@@ -414,6 +422,10 @@ class Admin extends Controller
         $flashSuccessMessages = [];
         $flashErrorMessages = [];
 
+        // Get the notification template from settings
+        $settings = $this->settingModel->getSettings(); // Pastikan Anda memiliki model untuk settings
+        $templateMessage = $settings['notifikasi_reminder']; // Ambil template pesan
+
         // Send notifications for each case
         foreach ($reminderData as $data) {
             $noPerkara = $data['no_perkara'];
@@ -426,12 +438,17 @@ class Admin extends Controller
             // Calculate the reminder date and format it as dd/mm/yyyy
             $reminderDate = date('d/m/Y', strtotime("+{$reminderDays} days"));
 
-            // Compose the message with the reminder date
-            $message = "Pemberitahuan: Akta Cerai untuk perkara nomor *{$noPerkara}* atas nama *{$namaPenggugat}* akan segera terbit dalam {$reminderDays} hari lagi atau pada tanggal *{$reminderDate}*.";
+            // Siapkan pesan dengan data dinamis
+            $message = str_replace(
+                ['[no_perkara]', '[penggugat]', '[jumlah_hari]', '[tanggal_terbit]'],
+                [$noPerkara, $namaPenggugat, $reminderDays, $reminderDate],
+                $templateMessage
+            );
+
+            // dd($message);
+            // die;
 
             // Prepare the request data for the API
-            $settings = $this->settingModel->getSettings(); // Pastikan Anda memiliki model untuk settings
-
             $apikey = $settings['apikey'];
             $waGateway = $settings['wa_gateway'];
             $sender = $settings['wa_sender'];
@@ -442,6 +459,9 @@ class Admin extends Controller
                 "number" => $formattedNumber,
                 "message" => $message
             ];
+
+            // dd($requestData);
+            // die;
 
             // Send WhatsApp message using cURL
             $curl = curl_init();
@@ -480,6 +500,96 @@ class Admin extends Controller
 
         // Redirect back to the reminder page
         return redirect()->to(base_url('admin/reminder')); // Adjust if necessary
+    }
+
+    public function User()
+    {
+        // Cek apakah pengguna sudah login
+        if (!session()->get('logged_in')) {
+            return redirect()->to(base_url('/')); // Redirect ke halaman home jika belum login
+        }
+
+        // Ambil ID pengguna dari sesi
+        $userId = session()->get('id'); // Pastikan Anda menyimpan user_id saat login
+
+        // Ambil data pengguna berdasarkan ID
+        $userData = $this->userModel->getUserById($userId);
+
+        // Cek apakah data pengguna ditemukan
+        if (!$userData) {
+            // Jika tidak ditemukan, arahkan kembali atau tampilkan pesan kesalahan
+            return redirect()->to(base_url('/'))->with('error', 'Pengguna tidak ditemukan');
+        }
+
+        // Siapkan data untuk dikirim ke view
+        $data = [
+            'title' => 'User',
+            'settings' => $this->settingModel->first(),
+            'user' => [
+                'id' => $userData['id'],
+                'username' => $userData['username'] ?? 'Tidak ada', // Ambil username
+                'nama' => $userData['nama'] ?? 'Tidak ada',         // Ambil nama
+                'password' => $userData['password'] ?? 'Tidak ada'  // Ambil password
+            ]
+        ];
+
+        // Tampilkan view dengan data yang telah disiapkan
+        return view('admin/pages/user', $data);
+    }
+
+    public function updateUser()
+    {
+        $session = session();
+        $model = new UserModel();
+
+        // Ambil data dari form
+        $id = $this->request->getVar('id');
+        $oldPassword = $this->request->getVar('old_password');
+        $newPassword = $this->request->getVar('password');
+        $nama = $this->request->getVar('nama');
+        $username = $this->request->getVar('username');
+
+        // Cari pengguna berdasarkan ID
+        $user = $model->find($id);
+
+        // Jika pengguna tidak ditemukan, beri tahu pengguna
+        if (!$user) {
+            $session->setFlashdata('error_message', 'User tidak ditemukan.');
+            return redirect()->to('/admin/user');
+        }
+
+        // Log untuk memeriksa nilai password
+        log_message('debug', 'Old Password: ' . $oldPassword);
+        log_message('debug', 'User Password Hash: ' . $user['password']);
+
+        // Siapkan data untuk diperbarui
+        $data = [
+            'nama' => $nama,
+            'username' => $username,
+        ];
+
+        // Jika password lama diisi, verifikasi password lama
+        if (!empty($oldPassword)) {
+            if (password_verify($oldPassword, $user['password'])) {
+                // Jika password lama benar, tambahkan password baru jika diisi
+                if (!empty($newPassword)) {
+                    $data['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+                }
+                $model->update($id, $data);
+                $session->setFlashdata('message', 'User berhasil diubah.');
+            } else {
+                $session->setFlashdata('error_message', 'User gagal diubah. Password lama salah.');
+            }
+        } else {
+            // Jika password lama tidak diisi, hanya update nama dan username
+            if (!empty($newPassword)) {
+                $data['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            }
+            $model->update($id, $data);
+            $session->setFlashdata('message', 'User berhasil diubah.');
+        }
+
+        return redirect()->to('/admin/user');
     }
 
     public function setting()

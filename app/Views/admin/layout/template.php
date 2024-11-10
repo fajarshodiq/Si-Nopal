@@ -151,11 +151,10 @@
                             <i class="fa  fa-send-o"></i>
                             <span>Delivery Akta Cerai</span></a>
                     </li> -->
-                    <li class="treeview">
-                        <a href="#">
+                    <li>
+                        <a href="<?= base_url('/admin/user'); ?>">
                             <i class="fa fa-user-o"></i>
-                            <span>User</span>
-                        </a>
+                            <span>User</span></a>
                     </li>
                     <li>
                         <a href="<?= base_url('/admin/setting'); ?>">

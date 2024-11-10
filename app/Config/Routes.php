@@ -39,6 +39,10 @@ $routes->get('admin/deleteAktaCerai/(:num)', 'Admin::deleteAktaCerai/$1'); //hap
 $routes->get('/admin/reminder/', 'Admin::reminder');
 $routes->post('/admin/sendReminder', 'Admin::sendReminderNotification');
 
+//User
+$routes->get('/admin/user/', 'Admin::User');
+$routes->post('/admin/updateUser/', 'Admin::updateUser');
+
 //setting
 $routes->get('/admin/setting/', 'Admin::setting');
 $routes->post('/admin/saveSetting/', 'Admin::saveSetting');

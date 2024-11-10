@@ -20,7 +20,7 @@
                 <div class="col-md-3">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <b>Latar Website</b>
+                            <b>Background Website</b>
                         </div>
                         <div class="box-body box-profile text-center">
                             <a href="#" class="progressive" style="cursor: default;">
@@ -65,7 +65,7 @@
                                 <div class="col-sm-12 col-md-4">
                                     <input class="form-control input-sm" id="wa_sender" name="wa_sender" type="text" value="<?= $settings['wa_sender'] ?? ''; ?>" required>
                                 </div>
-                                <label class="col-sm-12 col-md-5 pull-left">Nomor Pengirim WA (08xxxxxxxxxx)</label>
+                                <label class="col-sm-12 col-md-5 pull-left">Nomor Pengirim WA (628xxxxxxxxxx)</label>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-12 col-md-3" for="apikey">ApiKey</label>
@@ -101,6 +101,12 @@
                                     <textarea class="form-control input-sm" id="notifikasi_reminder" name="notifikasi_reminder" required><?= $settings['notifikasi_reminder'] ?? ''; ?></textarea>
                                 </div>
                                 <label class="col-sm-12 col-md-5 pull-left">Notifikasi Untuk Pengingat</label>
+                                <div class="col-sm-12 col-md-5 pull-left">
+                                    <small class="text-muted">
+                                        Format penulisan data dinamis yang bisa ditulis ke dalam input adalah:
+                                        <strong>[no_perkara], [penggugat], [jumlah_hari], [tanggal_terbit]</strong>
+                                    </small>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-12 col-md-3" for="notifikasi_penerbitan_akta_cerai">Notifikasi Penerbitan Akta Cerai</label>
@@ -108,6 +114,12 @@
                                     <textarea class="form-control input-sm" id="notifikasi_penerbitan_akta_cerai" name="notifikasi_penerbitan_akta_cerai" required><?= $settings['notifikasi_penerbitan_akta_cerai'] ?? ''; ?></textarea>
                                 </div>
                                 <label class="col-sm-12 col-md-5 pull-left">Notifikasi Setelah Penerbitan Akta Cerai</label>
+                                <div class="col-sm-12 col-md-5 pull-left">
+                                    <small class="text-muted">
+                                        Format penulisan data dinamis yang bisa ditulis ke dalam input adalah:
+                                        <strong>[no_perkara], [penggugat], [no_seri], [tanggal], [delivery]</strong>
+                                    </small>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-12 col-md-4 offset-md-3">
