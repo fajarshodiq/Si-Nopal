@@ -25,7 +25,7 @@
         <div class="small-box bg-yellow">
           <div class="inner">
             <h3><?= $jumlah_perkara; ?></h3>
-            <p>Perkara</p>
+            <p>Perkara Telah Memiliki PBT</p>
           </div>
           <div class="icon">
             <i class="ion ion-document-text"></i>
@@ -39,7 +39,7 @@
         <div class="small-box bg-red">
           <div class="inner">
             <h3><?= $jumlah_akta_cerai; ?></h3>
-            <p>Akta Cerai</p>
+            <p>Akta Cerai Telah Terbit</p>
           </div>
           <div class="icon">
             <i class="ion ion-folder"></i>

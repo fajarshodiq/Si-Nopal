@@ -88,7 +88,7 @@
                         <input type="text" class="form-control" name="nama_tergugat" required>
                     </div>
                     <div class="form-group">
-                        <label for="tanggal_pendaftaran">Tanggal Pendaftaran</label>
+                        <label for="tanggal_pendaftaran">Tanggal PBT</label>
                         <input type="date" class="form-control" name="tanggal_pendaftaran" required>
                     </div>
                     <div class="form-group">
@@ -137,7 +137,7 @@
                         <input type="text" class="form-control" id="edit_nama_tergugat" name="nama_tergugat" value="<?= $p['nama_tergugat']; ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="edit_tanggal_pendaftaran">Tanggal Pendaftaran</label>
+                        <label for="edit_tanggal_pendaftaran">Tanggal PBT</label>
                         <input type="date" class="form-control" id="edit_tanggal_pendaftaran" name="tanggal_pendaftaran" value="<?= $p['tanggal_pendaftaran']; ?>" required>
                     </div>
                     <div class="form-group">
